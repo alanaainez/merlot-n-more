@@ -1,2 +1,2 @@
 # wine-search-api
-A MERN application with a GraphQL API for a wine dictionary!
+A MERN application with an API for a wine dictionary!
