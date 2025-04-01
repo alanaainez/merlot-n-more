@@ -23,17 +23,3 @@ export const authenticateToken = ({ req }) => {
   
     return req;
   };
-  
-  export const signToken = (username, email, _id) => {
-    const payload = { username, email, _id };
-    const secretKey = process.env.JWT_SECRET_KEY;
-  
-    return jwt.sign({data: payload}, secretKey, { expiresIn: '2h' });
-  };
-  
-  export class AuthenticationError extends GraphQLError {
-    constructor(message) {
-      super(message, undefined, undefined, undefined, ['UNAUTHENTICATED']);
-      Object.defineProperty(this, 'name', { value: 'AuthenticationError' });
-    }
-  };
