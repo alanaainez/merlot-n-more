@@ -4,6 +4,12 @@ import path from 'node:path';
 import db from './config/connection.js';
 import routes from './routes/index.js';
 
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
