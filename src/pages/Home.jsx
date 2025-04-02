@@ -53,9 +53,9 @@ const Home = () => {
             <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden">
               <img
                 src={`https://images.unsplash.com/photo-${i === 1 ? '1510812431401-41d2bd2722f3' : 
-                      i === 2 ? '1553361371-9ccc88d3c28b' :
-                      i === 3 ? '1547595628-c61a29f496f0' :
-                      '1516594798947-e65505dbb29d'}`}
+                  i === 2 ? '1553361371-9ccc88d3c28b' :
+                  i === 3 ? '1547595628-c61a29f496f0' :
+                  '1516594798947-e65505dbb29d'}`}
                 alt="Wine"
                 className="w-full h-48 object-cover"
               />

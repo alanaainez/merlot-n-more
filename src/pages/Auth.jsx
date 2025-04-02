@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase.js';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -10,7 +10,7 @@ const Auth = () => {
   const [error, setError] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
 
-  const handleAuth = async (e: React.FormEvent) => {
+  const handleAuth = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -67,9 +67,7 @@ const Auth = () => {
           />
         </div>
 
-        {error && (
-          <div className="text-red-600 text-sm">{error}</div>
-        )}
+        {error && <div className="text-red-600 text-sm">{error}</div>}
 
         <button
           type="submit"

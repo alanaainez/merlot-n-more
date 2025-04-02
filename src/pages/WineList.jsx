@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Star, Loader } from 'lucide-react';
-import { searchWines, Wine } from '../lib/api';
+import { searchWines } from '../lib/api.js';
 
 const wineTypes = [
   {
@@ -28,14 +28,14 @@ const wineTypes = [
 const WineList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
-  const [wines, setWines] = useState<Wine[]>([]);
+  const [wines, setWines] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchWines = async () => {
       if (searchTerm.length < 2) return;
-      
+
       setLoading(true);
       setError('');
       try {
@@ -61,7 +61,7 @@ const WineList = () => {
     <div className="max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4 md:mb-0">Wine Collection</h1>
-        
+
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -96,7 +96,7 @@ const WineList = () => {
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Wine Types Guide</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {wineTypes.map((wine) => (
-            <div 
+            <div
               key={wine.type}
               className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
             >
