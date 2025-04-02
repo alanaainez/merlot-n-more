@@ -6,12 +6,12 @@ const wineTypes = [
   {
     type: "Red Wine",
     description: "Full-bodied and rich in tannins, red wines range from light Pinot Noir to bold Cabernet Sauvignon. Perfect with red meats and hearty dishes.",
-    image: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3"
+    image: "https://images.unsplash.com/photo-1561461056-77634126673a"
   },
   {
     type: "White Wine",
     description: "Crisp and refreshing, white wines vary from dry Chardonnay to sweet Riesling. Ideal with seafood, poultry, and light dishes.",
-    image: "https://images.unsplash.com/photo-1566275529824-cca6d008f3da"
+    image: "https://images.unsplash.com/photo-1558346489-19413928158b"
   },
   {
     type: "Rosé",
@@ -21,7 +21,7 @@ const wineTypes = [
   {
     type: "Sparkling",
     description: "Effervescent and celebratory, sparkling wines like Champagne and Prosecco are perfect for celebrations and appetizers.",
-    image: "https://images.unsplash.com/photo-1594144637952-b9f1b8b289ab"
+    image: "https://plus.unsplash.com/premium_photo-1677327746215-6d9411e306f1"
   }
 ];
 
