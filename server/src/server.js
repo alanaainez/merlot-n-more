@@ -28,7 +28,6 @@ db.once('open', () => {
 });
 
 
-
 // Uncomment this code below
 
 // import express from 'express';
