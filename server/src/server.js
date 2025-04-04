@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import express from 'express';
 import path from 'node:path';
 import { ApolloServer } from '@apollo/server';
@@ -44,7 +43,6 @@ const startApolloServer = async () => {
 };
 
 startApolloServer();
-=======
 //I reccomend getting rid of the code below but you can comment it out
 import express from 'express';
 import path from 'node:path';
@@ -132,4 +130,3 @@ db.once('open', () => {
 
 // // Call the async function to start the server
 // startApolloServer();
->>>>>>> 4eff5b43630ff18278eb2990de7edd9db467b47c
