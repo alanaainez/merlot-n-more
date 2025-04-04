@@ -1,9 +1,18 @@
 // User.js
+<<<<<<< HEAD
+
+import { Schema, model } from 'mongoose';
+import bcrypt from 'bcrypt';
+
+// import schema from Book.js
+import bookSchema from './Book.js';
+=======
 import { Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
 
 // import schema from Wine.js
 import wineSchema from './Wine.js';
+>>>>>>> 4eff5b43630ff18278eb2990de7edd9db467b47c
 
 const userSchema = new Schema(
   {
@@ -22,8 +31,13 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+<<<<<<< HEAD
+    // set savedBooks to be an array of data that adheres to the bookSchema
+    savedBooks: [bookSchema],
+=======
     // set savedWines to be an array of data that adheres to the wineSchema
     savedWines: [wineSchema],
+>>>>>>> 4eff5b43630ff18278eb2990de7edd9db467b47c
   },
   // set this to use virtual below
   {
@@ -48,9 +62,15 @@ userSchema.methods.isCorrectPassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
+<<<<<<< HEAD
+// when we query a user, we'll also get another field called `bookCount` with the number of saved books we have
+userSchema.virtual('bookCount').get(function () {
+  return this.savedBooks.length;
+=======
 // when we query a user, we'll also get another field called `wineCount` with the number of saved wines we have
 userSchema.virtual('wineCount').get(function () {
   return this.savedWines.length;
+>>>>>>> 4eff5b43630ff18278eb2990de7edd9db467b47c
 });
 
 const User = model('User', userSchema);
