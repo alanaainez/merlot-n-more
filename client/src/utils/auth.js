@@ -1,10 +1,6 @@
+// auth.js
 // use this to decode a token and get the user's information out of it
 import { jwtDecode } from 'jwt-decode';
-
-interface UserToken {
-  name: string;
-  exp: number;
-}
 
 // create a new class to instantiate for a user
 class AuthService {
@@ -21,13 +17,13 @@ class AuthService {
   }
 
   // check if token is expired
-  isTokenExpired(token: string) {
+  isTokenExpired(token) {
     try {
-      const decoded = jwtDecode<UserToken>(token);
+      const decoded = jwtDecode(token);
       if (decoded.exp < Date.now() / 1000) {
         return true;
-      } 
-      
+      }
+
       return false;
     } catch (err) {
       return false;
@@ -39,7 +35,7 @@ class AuthService {
     return localStorage.getItem('id_token');
   }
 
-  login(idToken: string) {
+  login(idToken) {
     // Saves user token to localStorage
     localStorage.setItem('id_token', idToken);
     window.location.assign('/');
