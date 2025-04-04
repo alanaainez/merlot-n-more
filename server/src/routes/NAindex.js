@@ -1,4 +1,3 @@
-import type { Request, Response } from 'express';
 import express from 'express';
 const router = express.Router();
 
@@ -11,7 +10,7 @@ import apiRoutes from './api/index.js';
 router.use('/api', apiRoutes);
 
 // serve up react front-end in production
-router.use((_req: Request, res: Response) => {
+router.use((_req, res) => {
   res.sendFile(path.join(__dirname, '../../client/build/index.html'));
 });
 

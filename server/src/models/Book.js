@@ -1,16 +1,7 @@
-import { Schema, type Document } from 'mongoose';
-
-export interface BookDocument extends Document {
-  bookId: string;
-  title: string;
-  authors: string[];
-  description: string;
-  image: string;
-  link: string;
-}
+import { Schema } from 'mongoose';
 
 // This is a subdocument schema, it won't become its own model but we'll use it as the schema for the User's `savedBooks` array in User.js
-const bookSchema = new Schema<BookDocument>({
+const bookSchema = new Schema({
   authors: [
     {
       type: String,
