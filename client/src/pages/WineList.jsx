@@ -1,61 +1,109 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Star, Loader } from 'lucide-react';
-import { searchWines } from '../lib/api.js';
+import { Filter, Star, Loader } from 'lucide-react';
+import { fetchOpenFoodFactsWines } from '../lib/api.js';
+
+const WINE_FAVORITES_KEY = 'wineFavorites'; // Local storage key for wine favorites, change to database in the future
 
 const wineTypes = [
   {
     type: "Red Wine",
     description: "Full-bodied and rich in tannins, red wines range from light Pinot Noir to bold Cabernet Sauvignon. Perfect with red meats and hearty dishes.",
-    image: "https://images.unsplash.com/photo-1561461056-77634126673a"
+    image: "https://images.unsplash.com/photo-1561461056-77634126673a",
+    apiType: 'red'
   },
   {
     type: "White Wine",
     description: "Crisp and refreshing, white wines vary from dry Chardonnay to sweet Riesling. Ideal with seafood, poultry, and light dishes.",
-    image: "https://images.unsplash.com/photo-1558346489-19413928158b"
+    image: "https://images.unsplash.com/photo-1558346489-19413928158b",
+    apiType: 'white'
   },
   {
     type: "Rosé",
     description: "Fresh and vibrant, rosé wines offer the perfect balance between red and white. Great for summer and light Mediterranean cuisine.",
-    image: "https://images.unsplash.com/photo-1558001373-7b93ee48ffa0"
+    image: "https://images.unsplash.com/photo-1558001373-7b93ee48ffa0",
+    apiType: 'rose'
   },
   {
     type: "Sparkling",
     description: "Effervescent and celebratory, sparkling wines like Champagne and Prosecco are perfect for celebrations and appetizers.",
-    image: "https://plus.unsplash.com/premium_photo-1677327746215-6d9411e306f1"
+    image: "https://plus.unsplash.com/premium_photo-1677327746215-6d9411e306f1",
+    apiType: 'sparkling'
   }
 ];
 
 const WineList = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  //const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
-  const [wines, setWines] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [redWines, setRedWines] = useState([]);
+  const [whiteWines, setWhiteWines] = useState([]);
+  const [roseWines, setRoseWines] = useState([]);
+  const [sparklingWines, setSparklingWines] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [favorites, setFavorites] = useState(() => {
+    const storedFavorites = localStorage.getItem(WINE_FAVORITES_KEY); // Retrieve favorites from local storage
+    return storedFavorites ? JSON.parse(storedFavorites) : []; // Parse the stored JSON or return an empty array
+  });
 
   useEffect(() => {
-    const fetchWines = async () => {
-      if (searchTerm.length < 2) return;
-
+    const loadWinesByType = async () => {
       setLoading(true);
       setError('');
       try {
-        const results = await searchWines(searchTerm);
-        setWines(results);
-      } catch (err) {
-        setError('Failed to fetch wines. Please try again.');
-      } finally {
+        const redData = await fetchOpenFoodFactsWines('red');
+        setRedWines(redData);
+  
+        const whiteData = await fetchOpenFoodFactsWines('white');
+        setWhiteWines(whiteData);
+  
+        const roseData = await fetchOpenFoodFactsWines('rose');
+        setRoseWines(roseData);
+  
+        const sparklingData = await fetchOpenFoodFactsWines('sparkling');
+        setSparklingWines(sparklingData);
+  
         setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch wine data. Please try again.');
+        setLoading(false);
+        console.error('Error loading wine data:', err);
       }
     };
+    loadWinesByType();
+  }, [fetchOpenFoodFactsWines, setRedWines, setWhiteWines, setRoseWines, setSparklingWines, setLoading, setError]);
 
-    const debounce = setTimeout(fetchWines, 500);
-    return () => clearTimeout(debounce);
-  }, [searchTerm]);
+  useEffect(() => {
+    localStorage.setItem(WINE_FAVORITES_KEY, JSON.stringify(favorites)); // Store favorites in local storage
+  }, [favorites]);
 
-  const filteredWines = wines.filter(wine => {
-    const matchesType = !selectedType || wine.title.toLowerCase().includes(selectedType.toLowerCase());
-    return matchesType;
-  });
+  const isFavorite = (wine) => {
+    return favorites.some(fav => fav.name === wine.name && fav.genericName === wine.genericName);
+  }
+  
+  const toggleFavorite = (wine) => {
+    const alreadyFavorite = isFavorite(wine);
+    if (alreadyFavorite) {
+      setFavorites(favorites.filter(fav => !(fav.name === wine.name && fav.genericName === wine.genericName))); // Remove from favorites  
+    } else {
+      setFavorites([...favorites, wine]);
+    }
+  }
+
+  const allWines = {
+    red: redWines,
+    white: whiteWines,
+    rose: roseWines,
+    sparkling: sparklingWines,
+  };
+
+  const filteredWines = Object.entries(allWines).reduce((acc, [type, wines]) => {
+    if (!selectedType || selectedType.toLowerCase() === type) {
+      acc[type] = wines; // Include wines of the current type if no filter is applied
+    } else {
+      acc[type] = []; // Exclude wines of the current type if it doesn't match the filter
+    }
+    return acc;
+    }, {});
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -63,17 +111,6 @@ const WineList = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-4 md:mb-0">Wine Collection</h1>
 
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <input
-              type="text"
-              placeholder="Search wines..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-[#8b0000] focus:border-[#8b0000] w-full"
-            />
-          </div>
-
           <div className="relative">
             <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <select
@@ -133,44 +170,33 @@ const WineList = () => {
         </div>
       )}
 
-      {!loading && !error && wines.length === 0 && searchTerm.length >= 2 && (
-        <div className="text-center py-12 text-gray-500">
-          No wines found. Try a different search term.
-        </div>
-      )}
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredWines.map((wine) => (
-          <div key={wine.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-            <img
-              src={wine.imageUrl || 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3'}
-              alt={wine.title}
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-6">
-              <h3 className="text-xl font-semibold mb-2">{wine.title}</h3>
-              <div className="flex items-center mb-2">
-                <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                <span className="ml-1 text-sm text-gray-600">
-                  {wine.averageRating.toFixed(1)} ({wine.ratingCount} reviews)
-                </span>
+      {!loading && !error && Object.values(filteredWines).flat().length > 0 && (
+        <div className="grid md: grid-cols2 lg:grid-cols-3 gap-6">
+          {Object.entries(filteredWines).map(([type, wines]) => (
+            wines.length > 0 && (
+              <div key={type} className="mb-12">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                  {type.charAt(0).toUpperCase() + type.slice(1)} Wines</h2>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {wines.map((wine, index) => (
+                    <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
+                      <div className="p-6 relative">
+                      <h3 className="text-xl font-semibold mb-2">{wine.name || 'No Name'}</h3>
+                      <p className="text-gray-500 text-sm line-clamp-3">{wine.genericName || 'No Description'}</p>
+                      <button onClick={() => toggleFavorite(wine)}
+                              className="absolute top-2 right-2 focus:outline-none">
+                      <Star className={`h-5 w-5 ${isFavorite(wine) ? 'text-yellow-400' : 'text-gray-300'}`} />
+                      </button>
+                    </div>
+                 </div>
+              ))}
               </div>
-              <p className="text-[#8b0000] font-semibold mb-4">{wine.price}</p>
-              <p className="text-gray-500 text-sm line-clamp-3">{wine.description}</p>
-              <a
-                href={wine.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-block text-[#8b0000] hover:text-[#6b0000] text-sm font-medium"
-              >
-                Learn More →
-              </a>
             </div>
-          </div>
+            )
         ))}
       </div>
-    </div>
-  );
-};
+    )}
+  </div>
+  )};
 
 export default WineList;
