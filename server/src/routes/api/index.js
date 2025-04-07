@@ -1,7 +1,10 @@
 import express from 'express';
-const router = express.Router();
-import userRoutes from './user-routes.js';
+import authRoutes from './auth-routes.js';
+import wineRoutes from './wine-routes.js';
 
-router.use('/users', userRoutes);
+const router = express.Router();
+
+router.use('/auth', authRoutes);
+router.use('/wines', wineRoutes);
 
 export default router;
