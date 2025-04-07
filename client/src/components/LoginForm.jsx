@@ -6,7 +6,7 @@ import { loginUser } from '../utils/API';
 import Auth from '../utils/auth';
 
 const LoginForm = ({ handleModalClose }) => {
-  const [userFormData, setUserFormData] = useState({ username: '', email: '', password: '', savedBooks: [] });
+  const [userFormData, setUserFormData] = useState({ username: '', email: '', password: '', savedWines: [] });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
 
@@ -42,7 +42,7 @@ const LoginForm = ({ handleModalClose }) => {
       username: '',
       email: '',
       password: '',
-      savedBooks: [],
+      savedWines: [],
     });
   };
 
