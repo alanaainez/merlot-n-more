@@ -46,13 +46,13 @@ export const login = async (req, res) => {
   return res.json({ token, user });
 };
 
-// save a book to a user's `savedBooks` field by adding it to the set (to prevent duplicates)
+// save a wine to a user's `savedWines` field by adding it to the set (to prevent duplicates)
 // user comes from `req.user` created in the auth middleware function
-export const saveBook = async (req, res) => {
+export const saveWine = async (req, res) => {
   try {
     const updatedUser = await User.findOneAndUpdate(
       { _id: req.user._id },
-      { $addToSet: { savedBooks: req.body } },
+      { $addToSet: { savedWines: req.body } },
       { new: true, runValidators: true }
     );
     return res.json(updatedUser);
@@ -62,11 +62,11 @@ export const saveBook = async (req, res) => {
   }
 };
 
-// remove a book from `savedBooks`
-export const deleteBook = async (req, res) => {
+// remove a wine from `savedWines`
+export const deleteWine = async (req, res) => {
   const updatedUser = await User.findOneAndUpdate(
     { _id: req.user._id },
-    { $pull: { savedBooks: { bookId: req.params.bookId } } },
+    { $pull: { savedWines: { wineId: req.params.wineId } } },
     { new: true }
   );
   if (!updatedUser) {
