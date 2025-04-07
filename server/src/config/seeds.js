@@ -1,6 +1,6 @@
-import db from './connection.js';
+import db from './connections.js';
 import User from '../models/User.js';
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 
 db.once('open', async () => {
   try {
