@@ -1,9 +1,5 @@
-// User.js
 import { Schema, model } from 'mongoose';
-import bcrypt from 'bcrypt';
-
-// import schema from Wine.js
-import wineSchema from './Wine.js';
+import bcryptjs from 'bcryptjs';
 
 const userSchema = new Schema(
   {
@@ -11,48 +7,53 @@ const userSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      match: [/.+@.+\..+/, 'Must use a valid email address'],
+      trim: true
     },
     password: {
       type: String,
       required: true,
+      minlength: 5
     },
-    // set savedWines to be an array of data that adheres to the wineSchema
-    savedWines: [wineSchema],
+    savedWines: [
+      {
+        wineId: {
+          type: String,
+          required: true
+        },
+        name: String,
+        type: String,
+        region: String,
+        rating: Number,
+        image_url: String
+      }
+    ]
   },
-  // set this to use virtual below
   {
     toJSON: {
       virtuals: true,
+      transform: (_doc, ret) => {
+        delete ret.password;
+        return ret;
+      }
     },
+    id: false
   }
 );
 
-// hash user password
 userSchema.pre('save', async function (next) {
   if (this.isNew || this.isModified('password')) {
     const saltRounds = 10;
-    this.password = await bcrypt.hash(this.password, saltRounds);
+    this.password = await bcryptjs.hash(this.password, saltRounds);
   }
-
   next();
 });
 
-// custom method to compare and validate password for logging in
 userSchema.methods.isCorrectPassword = async function (password) {
-  return await bcrypt.compare(password, this.password);
+  return bcryptjs.compare(password, this.password);
 };
-
-// when we query a user, we'll also get another field called `wineCount` with the number of saved wines we have
-userSchema.virtual('wineCount').get(function () {
-  return this.savedWines.length;
-});
 
 const User = model('User', userSchema);
 
 export default User;
+
+export { User }
