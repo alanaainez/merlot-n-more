@@ -115,6 +115,23 @@ const topSellingWines = [
 
 const Home = () => {
   return (
+    <div className="relative">
+      {}
+      <video
+        className="absolute top-0 left-0 w-full h-full object-cover"
+        src="/videos/merlotnmorevid1.mp4"
+        autoPlay
+        loop
+        muted
+      >
+        <source
+          src="https://www.canva.com/design/DAFbmEjD41s/8hMk6UpEHLQ8daXmD3gjLg/view?utm_content=DAFbmEjD41s&utm_campaign=designshare&utm_medium=link&utm_source=viewer"
+          type="video/mp4"
+        />
+        Your browser does not support the video tag.
+      </video>
+
+      {}
     <div className="max-w-7xl mx-auto">
       <div className="text-center py-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -206,6 +223,7 @@ const Home = () => {
         </div>
       </div>
     </div>
+  </div>
   );
 };
 
