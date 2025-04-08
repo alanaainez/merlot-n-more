@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Filter, Star, Loader } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { searchWines, fetchOpenFoodFactsWines } from '../lib/api.js'; // Import both API functions
+import { searchWines, fetchOpenFoodFactsWines } from '../lib/api.js';
 
-const WINE_FAVORITES_KEY = 'wineFavorites'; // Local storage key for wine favorites
+const WINE_FAVORITES_KEY = 'wineFavorites';
 
 const wineTypes = [
   {
@@ -49,7 +49,7 @@ const WineList = () => {
   const [whiteWines, setWhiteWines] = useState([]);
   const [roseWines, setRoseWines] = useState([]);
   const [sparklingWines, setSparklingWines] = useState([]);
-  const [wines, setWines] = useState([]); // State for search results
+  const [wines, setWines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [favorites, setFavorites] = useState(() => {
@@ -66,16 +66,16 @@ const WineList = () => {
       setError('');
       try {
         const redData = await fetchOpenFoodFactsWines('red');
-        setRedWines(redData);
+        setRedWines(redData.filter(wine => wine.name)); // Only include wines with names
 
         const whiteData = await fetchOpenFoodFactsWines('white');
-        setWhiteWines(whiteData);
+        setWhiteWines(whiteData.filter(wine => wine.name));
 
         const roseData = await fetchOpenFoodFactsWines('rose');
-        setRoseWines(roseData);
+        setRoseWines(roseData.filter(wine => wine.name));
 
         const sparklingData = await fetchOpenFoodFactsWines('sparkling');
-        setSparklingWines(sparklingData);
+        setSparklingWines(sparklingData.filter(wine => wine.name));
 
         setLoading(false);
       } catch (err) {
@@ -86,7 +86,7 @@ const WineList = () => {
     };
 
     loadWinesByType();
-  }, [fetchOpenFoodFactsWines, setRedWines, setWhiteWines, setRoseWines, setSparklingWines, setLoading, setError]);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -110,7 +110,7 @@ const WineList = () => {
       setError('');
       try {
         const searchResults = await searchWines(searchTerm);
-        setWines(searchResults);
+        setWines(searchResults.filter(wine => wine.title)); // Only include wines with titles
         setLoading(false);
       } catch (err) {
         setError('Failed to fetch search results. Please try again.');
@@ -120,10 +120,10 @@ const WineList = () => {
     };
 
     fetchSearchResults();
-  }, [searchTerm, searchWines, setLoading, setError]);
+  }, [searchTerm]);
 
   useEffect(() => {
-    localStorage.setItem(WINE_FAVORITES_KEY, JSON.stringify(favorites)); // Store favorites in local storage
+    localStorage.setItem(WINE_FAVORITES_KEY, JSON.stringify(favorites));
   }, [favorites]);
 
   const isFavorite = (wine) => {
@@ -330,8 +330,8 @@ const WineList = () => {
                   {wines.map((wine, index) => (
                     <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
                       <div className="p-6 relative">
-                        <h3 className="text-xl font-semibold mb-2">{wine.name || 'No Name'}</h3>
-                        <p className="text-gray-500 text-sm line-clamp-3">{wine.genericName || 'No Description'}</p>
+                        <h3 className="text-xl font-semibold mb-2">{wine.name}</h3>
+                        <p className="text-gray-500 text-sm line-clamp-3">{wine.genericName || 'No description available'}</p>
                         <button onClick={() => toggleFavorite(wine)} className="absolute top-2 right-2 focus:outline-none">
                           <Star className={`h-5 w-5 ${isFavorite(wine) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
                         </button>
