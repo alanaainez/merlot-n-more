@@ -126,6 +126,7 @@ const Home = () => {
         <source src="/videos/merlotnmorevid1.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
+      {}
 
       <div className="relative z-10 max-w-7xl mx-auto bg-black/60 text-white p-8 rounded-lg">
         <div className="text-center py-12">
@@ -222,6 +223,7 @@ const Home = () => {
         </div>
       </div>
     </div>
+  </div>
   );
 };
 
