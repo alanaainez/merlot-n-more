@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Wine, Search, User } from 'lucide-react';
-import Auth from '../utils/auth';
+import Auth from '../utils/auth.js';
 
 const Navbar = () => {
   return (

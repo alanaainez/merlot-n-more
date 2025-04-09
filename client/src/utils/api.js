@@ -1,5 +1,5 @@
 import axios from 'axios';
-import Auth from './auth';
+import Auth from './auth.js';
 
 const api = axios.create({
   baseURL: '/api'
