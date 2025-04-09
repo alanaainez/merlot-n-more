@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signupUser } from '../utils/api';
-import Auth from '../utils/auth';
+import { signupUser } from '../utils/api.js';
+import Auth from '../utils/auth.js';
 import { Eye, EyeOff } from 'lucide-react';
 
 const Signup = () => {

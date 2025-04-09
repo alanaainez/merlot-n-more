@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Wine, Star, Trash2 } from 'lucide-react';
-import { getFavoriteWines, removeWine } from '../utils/api';
-import Auth from '../utils/auth';
+import { getFavoriteWines, removeWine } from '../utils/api.js';
+import Auth from '../utils/auth.js';
 
 const Favorites = () => {
   const [wines, setWines] = useState([]);
