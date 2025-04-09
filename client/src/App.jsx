@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
-import Home from './pages/Home.jsx';
+import Home from './pages/Home2.jsx';
 import WineList from './pages/WineList.jsx';
 import RedWines from './pages/RedWines.jsx';
 import WhiteWines from './pages/WhiteWines.jsx';
