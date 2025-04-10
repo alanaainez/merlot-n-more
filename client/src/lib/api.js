@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const API_KEY = import.meta.env.VITE_SPOONACULAR_API_KEY;
-const BASE_URL = '/api/wines';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const BASE_URL = `${BACKEND_URL}/api/wines`;
 
 // Create axios instance with default config
 const api = axios.create({
