@@ -15,6 +15,7 @@ const Login = () => {
     try {
       const response = await loginUser(formState);
       const { token } = response.data;
+      // Auth.login will now trigger the auth-change event
       Auth.login(token);
       navigate('/'); // Redirect to home page
     } catch (err) {

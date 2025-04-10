@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar.jsx';
 import Home from './pages/Home.jsx';
 import WineList from './pages/WineList.jsx';
@@ -14,25 +15,26 @@ import Favorites from './pages/Favorites.jsx';
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <main className="container mx-auto px-4 py-8">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/wines" element={<WineList />} />
-            <Route path="/wines/red" element={<RedWines />} />
-            <Route path="/wines/white" element={<WhiteWines />} />
-            <Route path="/wines/rose" element={<RoseWines />} />
-            <Route path="/wines/sparkling" element={<SparklingWines />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/favorites" element={<Favorites />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-      </div>
+      <AuthProvider>
+        <div className="min-h-screen bg-gray-50">
+          <Navbar />
+          <main className="container mx-auto px-4 py-8">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/wines" element={<WineList />} />
+              <Route path="/wines/red" element={<RedWines />} />
+              <Route path="/wines/white" element={<WhiteWines />} />
+              <Route path="/wines/rose" element={<RoseWines />} />
+              <Route path="/wines/sparkling" element={<SparklingWines />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/favorites" element={<Favorites />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+        </div>
+      </AuthProvider>
     </Router>
   );
 }
-
 export default App;
