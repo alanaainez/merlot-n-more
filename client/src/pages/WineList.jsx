@@ -88,6 +88,19 @@ const WineList = () => {
     loadWinesByType();
   }, []);
 
+  // Add an effect to reload favorites whenever localStorage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const storedFavorites = localStorage.getItem(WINE_FAVORITES_KEY);
+      if (storedFavorites) {
+        setFavorites(JSON.parse(storedFavorites));
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -122,22 +135,52 @@ const WineList = () => {
     fetchSearchResults();
   }, [searchTerm]);
 
+  // Save favorites to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem(WINE_FAVORITES_KEY, JSON.stringify(favorites));
   }, [favorites]);
 
+  // Check if a wine is in favorites
   const isFavorite = (wine) => {
-    return favorites.some(fav => fav.name === wine.name && fav.genericName === wine.genericName);
-  }
-
-  const toggleFavorite = (wine) => {
-    const alreadyFavorite = isFavorite(wine);
-    if (alreadyFavorite) {
-      setFavorites(favorites.filter(fav => !(fav.name === wine.name && fav.genericName === wine.genericName)));
-    } else {
-      setFavorites([...favorites, wine]);
+    if (wine.title) {
+      // For search results
+      return favorites.some(fav => fav.name === wine.title);
+    } else if (wine.name) {
+      // For category wines
+      return favorites.some(fav => fav.name === wine.name && fav.genericName === wine.genericName);
     }
-  }
+    return false;
+  };
+
+  // Toggle a wine in favorites
+  const toggleFavorite = (wine, event) => {
+    // Prevent event bubbling
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
+    const wineToAdd = wine.title 
+      ? { name: wine.title, genericName: wine.description || '' } // Search results format
+      : { name: wine.name, genericName: wine.genericName || '' };  // Category format
+    
+    const isAlreadyFavorite = isFavorite(wine);
+    
+    if (isAlreadyFavorite) {
+      // Remove from favorites
+      const updatedFavorites = favorites.filter(fav => {
+        if (wine.title) {
+          return fav.name !== wine.title;
+        } else {
+          return !(fav.name === wine.name && fav.genericName === wine.genericName);
+        }
+      });
+      setFavorites(updatedFavorites);
+    } else {
+      // Add to favorites
+      setFavorites([...favorites, wineToAdd]);
+    }
+  };
 
   const allWinesByType = {
     red: redWines,
@@ -182,7 +225,7 @@ const WineList = () => {
   const shouldDisplayByType = searchTerm.length < 2;
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4 md:mb-0">Wine Collection</h1>
 
@@ -287,11 +330,21 @@ const WineList = () => {
                 alt={wine.title}
                 className="w-full h-48 object-cover"
               />
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">{wine.title}</h3>
+              <div className="p-6 relative">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-xl font-semibold">{wine.title}</h3>
+                  <button 
+                    onClick={(e) => toggleFavorite(wine, e)} 
+                    className="focus:outline-none"
+                    aria-label={isFavorite(wine) ? "Remove from favorites" : "Add to favorites"}
+                  >
+                    <Star 
+                      className={`h-6 w-6 ${isFavorite(wine) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                    />
+                  </button>
+                </div>
                 <div className="flex items-center mb-2">
-                  <Star className={`h-4 w-4 ${isFavorite(wine) ? 'text-yellow-400 fill-current' : 'text-gray-400'}`} />
-                  <span className="ml-1 text-sm text-gray-600">
+                  <span className="text-sm text-gray-600">
                     {wine.averageRating ? wine.averageRating.toFixed(1) : 'N/A'}
                     {wine.ratingCount ? ` (${wine.ratingCount} reviews)` : ''}
                   </span>
@@ -319,22 +372,30 @@ const WineList = () => {
       )}
 
       {shouldDisplayByType && !loading && !error && Object.values(filteredWinesByType).flat().length > 0 && (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div>
           {Object.entries(filteredWinesByType).map(([type, wines]) => (
             wines.length > 0 && (
               <div key={type} className="mb-12">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-6">
                   {type.charAt(0).toUpperCase() + type.slice(1)} Wines
                 </h2>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {wines.map((wine, index) => (
                     <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
-                      <div className="p-6 relative">
-                        <h3 className="text-xl font-semibold mb-2">{wine.name}</h3>
+                      <div className="p-6">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="text-xl font-semibold">{wine.name}</h3>
+                          <button 
+                            onClick={(e) => toggleFavorite(wine, e)} 
+                            className="focus:outline-none"
+                            aria-label={isFavorite(wine) ? "Remove from favorites" : "Add to favorites"}
+                          >
+                            <Star 
+                              className={`h-6 w-6 ${isFavorite(wine) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                            />
+                          </button>
+                        </div>
                         <p className="text-gray-500 text-sm line-clamp-3">{wine.genericName || 'No description available'}</p>
-                        <button onClick={() => toggleFavorite(wine)} className="absolute top-2 right-2 focus:outline-none">
-                          <Star className={`h-5 w-5 ${isFavorite(wine) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
-                        </button>
                       </div>
                     </div>
                   ))}
@@ -344,6 +405,17 @@ const WineList = () => {
           ))}
         </div>
       )}
+
+      {/* Link to favorites page */}
+      <div className="fixed bottom-8 right-8">
+        <Link 
+          to="/favorites" 
+          className="flex items-center gap-2 bg-[#8b0000] text-white px-4 py-3 rounded-full shadow-lg hover:bg-[#6b0000] transition-colors"
+        >
+          <Star className="h-5 w-5" />
+          <span>My Favorites ({favorites.length})</span>
+        </Link>
+      </div>
     </div>
   );
 };
