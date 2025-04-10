@@ -55,7 +55,7 @@ const Navbar = () => {
                   My Favorites
                 </Link>
                 <div className="px-3 py-2 text-sm">
-                  Welcome, {username}!
+                  Welcome{username}!
                 </div>
                 <button
                   onClick={handleLogout}
