@@ -138,7 +138,7 @@ const RedWines = () => {
         : `Added "${wine.name}" to favorites`
     );
   };
-
+    
   return (
     <div className="container mx-auto px-4 py-8">
       <Toaster position="top-right" />
@@ -147,7 +147,7 @@ const RedWines = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {topRedWines.map((wine) => (
           <div key={wine.id} className="group relative h-[340px] perspective">
-            {/* Star Button */}
+            
             <button
               onClick={(e) => {
                 e.preventDefault();
@@ -155,20 +155,21 @@ const RedWines = () => {
               }}
               className="absolute top-2 right-2 z-20"
             >
-              <Star
-                className={`h-5 w-5 ${
-                  isFavorite(wine)
-                    ? 'text-yellow-400 fill-yellow-400'
-                    : 'text-gray-300'
-                }`}
-              />
+             <Star
+  className={`h-5 w-5 ${
+    isFavorite(wine)
+      ? 'text-yellow-400 fill-yellow-400'
+      : 'text-gray-300'
+  }`}
+/>
+ 
             </button>
 
-            {/* Card */}
+            
             <div className="relative w-full h-full transform-style-preserve-3d transition-transform duration-500 card-flip">
 
 
-              {/* Front */}
+              
               <div className="absolute inset-0 backface-hidden bg-white rounded-lg overflow-hidden shadow-md">
                 <img
                   src={wine.image_url}
@@ -187,7 +188,7 @@ const RedWines = () => {
                 </div>
               </div>
 
-              {/* Back */}
+              
               <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white rounded-lg p-4 shadow-md">
                 <h4 className="text-md font-semibold mb-2">{wine.name}</h4>
                 <p className="text-sm text-gray-700">{wine.description}</p>
@@ -207,7 +208,7 @@ const RedWines = () => {
         </span>
       </Link>
 
-      {/* Flip styles */}
+      
       <style>{`
   .perspective {
     perspective: 1200px;
@@ -232,10 +233,8 @@ const RedWines = () => {
     transform: rotateY(180deg);
   }
 `}</style>
-
- 
-    </div>
-  );
+</div>
+);
 };
 
 export default RedWines;
