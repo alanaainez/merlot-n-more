@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, Filter, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { searchWines, fetchOpenFoodFactsWines } from '../lib/api.js';
-
 const WINE_FAVORITES_KEY = 'wineFavorites';
-
 const wineTypes = [
   {
     type: "Red Wine",
@@ -35,7 +33,6 @@ const wineTypes = [
     path: "/wines/sparkling"
   }
 ];
-
 const WineList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
@@ -49,12 +46,10 @@ const WineList = () => {
   const [wines, setWines] = useState([]);
   const [error, setError] = useState('');
   const searchRef = useRef(null);
-
   const [redWines, setRedWines] = useState([]);
   const [whiteWines, setWhiteWines] = useState([]);
   const [roseWines, setRoseWines] = useState([]);
   const [sparklingWines, setSparklingWines] = useState([]);
-
   useEffect(() => {
     const loadWines = async () => {
       setLoading(true);
@@ -74,20 +69,6 @@ const WineList = () => {
     };
     loadWines();
   }, []);
-
-  // Add an effect to reload favorites whenever localStorage changes
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const storedFavorites = localStorage.getItem(WINE_FAVORITES_KEY);
-      if (storedFavorites) {
-        setFavorites(JSON.parse(storedFavorites));
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
@@ -97,90 +78,10 @@ const WineList = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-
   const handleSuggestionClick = (text) => {
     setSearchTerm(text);
     setShowSuggestions(false);
-
-  useEffect(() => {
-    const fetchSearchResults = async () => {
-      if (searchTerm.length < 2) {
-        setWines([]);
-        return;
-      }
-
-      setLoading(true);
-      setError('');
-      try {
-        const searchResults = await searchWines(searchTerm);
-        setWines(searchResults.filter(wine => wine.title)); // Only include wines with titles
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch search results. Please try again.');
-        setLoading(false);
-        console.error('Error fetching search results:', err);
-      }
-    };
-
-    fetchSearchResults();
-  }, [searchTerm]);
-
-  // Save favorites to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem(WINE_FAVORITES_KEY, JSON.stringify(favorites));
-  }, [favorites]);
-
-  // Check if a wine is in favorites
-  const isFavorite = (wine) => {
-    if (wine.title) {
-      // For search results
-      return favorites.some(fav => fav.name === wine.title);
-    } else if (wine.name) {
-      // For category wines
-      return favorites.some(fav => fav.name === wine.name && fav.genericName === wine.genericName);
-    }
-    return false;
   };
-
-  // Toggle a wine in favorites
-  const toggleFavorite = (wine, event) => {
-    // Prevent event bubbling
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    
-    const wineToAdd = wine.title 
-      ? { name: wine.title, genericName: wine.description || '' } // Search results format
-      : { name: wine.name, genericName: wine.genericName || '' };  // Category format
-    
-    const isAlreadyFavorite = isFavorite(wine);
-    
-    if (isAlreadyFavorite) {
-      // Remove from favorites
-      const updatedFavorites = favorites.filter(fav => {
-        if (wine.title) {
-          return fav.name !== wine.title;
-        } else {
-          return !(fav.name === wine.name && fav.genericName === wine.genericName);
-        }
-      });
-      setFavorites(updatedFavorites);
-    } else {
-      // Add to favorites
-      setFavorites([...favorites, wineToAdd]);
-    }
-  };
-
-  const allWinesByType = {
-    red: redWines,
-    white: whiteWines,
-    rose: roseWines,
-    sparkling: sparklingWines,
-
-  };
-
   useEffect(() => {
     if (searchTerm.length > 1) {
       setSuggestions(
@@ -193,14 +94,21 @@ const WineList = () => {
       setSuggestions([]);
     }
   }, [searchTerm]);
-
+  const isFavorite = (wineType) => favorites.includes(wineType);
+  const toggleFavorite = (wineType) => {
+    let updatedFavorites;
+    if (favorites.includes(wineType)) {
+      updatedFavorites = favorites.filter(fav => fav !== wineType);
+    } else {
+      updatedFavorites = [...favorites, wineType];
+    }
+    setFavorites(updatedFavorites);
+    localStorage.setItem(WINE_FAVORITES_KEY, JSON.stringify(updatedFavorites));
+  };
   return (
     <div className="max-w-7xl mx-auto px-4">
-
       <div className="flex flex-col md:flex-row justify-between items-center mt-8 mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Wine Collection</h1>
-
-
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative" ref={searchRef}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -209,7 +117,7 @@ const WineList = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => setShowSuggestions(true)}
               placeholder="Search wines..."
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#8b0000] w-64"
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#8B0000] w-64"
             />
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute z-10 mt-1 bg-white border rounded-md shadow-md w-full">
@@ -225,13 +133,12 @@ const WineList = () => {
               </div>
             )}
           </div>
-
           <div className="relative">
             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-[#8b0000] w-48"
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-[#8B0000] w-48"
             >
               <option value="">All Types</option>
               <option value="red">Red</option>
@@ -242,9 +149,8 @@ const WineList = () => {
           </div>
         </div>
       </div>
-
       {/* Wine Types Section */}
-      <div className="mb-12 bg-[#fff8f8] p-6 rounded-xl animate-fadeIn">
+      <div className="mb-12 bg-[#FFF8F8] p-6 rounded-xl animate-fadeIn">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Wine Types Guide</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {wineTypes.map((wine) => (
@@ -262,7 +168,6 @@ const WineList = () => {
                     isFavorite(wine.type) ? 'text-yellow-400 fill-current' : 'text-gray-300'
                   }`}
                 />
-
               </button>
               <Link to={wine.path}>
                 <div className="relative h-48">
@@ -278,140 +183,12 @@ const WineList = () => {
                 </div>
                 <div className="p-4">
                   <p className="text-sm text-gray-700">{wine.description}</p>
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <h3 className="absolute bottom-4 left-4 text-xl font-semibold text-white">
-                  {wine.type}
-                </h3>
-              </div>
-              <div className="p-4">
-                <p className="text-gray-600 text-sm">
-                  {wine.description}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {loading && (
-        <div className="flex justify-center items-center py-12">
-          <Loader className="h-8 w-8 text-[#8b0000] animate-spin" />
-        </div>
-      )}
-
-      {error && (
-        <div className="bg-red-50 text-red-800 p-4 rounded-md mb-6">
-          {error}
-        </div>
-      )}
-
-      {shouldDisplaySearchResults && filteredSearchResults.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          No wines found for "{searchTerm}". Try a different search term.
-        </div>
-      )}
-
-      {shouldDisplaySearchResults && filteredSearchResults.length > 0 && (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSearchResults.map((wine) => (
-            <div key={wine.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-              <img
-                src={wine.imageUrl || 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3'}
-                alt={wine.title}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-6 relative">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-xl font-semibold">{wine.title}</h3>
-                  <button 
-                    onClick={(e) => toggleFavorite(wine, e)} 
-                    className="focus:outline-none"
-                    aria-label={isFavorite(wine) ? "Remove from favorites" : "Add to favorites"}
-                  >
-                    <Star 
-                      className={`h-6 w-6 ${isFavorite(wine) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
-                    />
-                  </button>
-                </div>
-                <div className="flex items-center mb-2">
-                  <span className="text-sm text-gray-600">
-                    {wine.averageRating ? wine.averageRating.toFixed(1) : 'N/A'}
-                    {wine.ratingCount ? ` (${wine.ratingCount} reviews)` : ''}
-                  </span>
-                </div>
-                <p className="text-[#8b0000] font-semibold mb-4">{wine.price || 'Price not available'}</p>
-                <p className="text-gray-500 text-sm line-clamp-3">{wine.description || 'No description available'}</p>
-                <a
-                  href={wine.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-block text-[#8b0000] hover:text-[#6b0000] text-sm font-medium"
-                >
-                  Learn More →
-                </a>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {shouldDisplayByType && Object.values(filteredWinesByType).flat().length === 0 && !loading && !error && (
-        <div className="text-center py-12 text-gray-500">
-          No wines found for the selected type.
-        </div>
-      )}
-
-      {shouldDisplayByType && !loading && !error && Object.values(filteredWinesByType).flat().length > 0 && (
-        <div>
-          {Object.entries(filteredWinesByType).map(([type, wines]) => (
-            wines.length > 0 && (
-              <div key={type} className="mb-12">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                  {type.charAt(0).toUpperCase() + type.slice(1)} Wines
-                </h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {wines.map((wine, index) => (
-                    <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
-                      <div className="p-6">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="text-xl font-semibold">{wine.name}</h3>
-                          <button 
-                            onClick={(e) => toggleFavorite(wine, e)} 
-                            className="focus:outline-none"
-                            aria-label={isFavorite(wine) ? "Remove from favorites" : "Add to favorites"}
-                          >
-                            <Star 
-                              className={`h-6 w-6 ${isFavorite(wine) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
-                            />
-                          </button>
-                        </div>
-                        <p className="text-gray-500 text-sm line-clamp-3">{wine.genericName || 'No description available'}</p>
-                      </div>
-                    </div>
-                  ))}
-
                 </div>
               </Link>
             </div>
           ))}
         </div>
-
-
-      )}
-
-      {/* Link to favorites page */}
-      <div className="fixed bottom-8 right-8">
-        <Link 
-          to="/favorites" 
-          className="flex items-center gap-2 bg-[#8b0000] text-white px-4 py-3 rounded-full shadow-lg hover:bg-[#6b0000] transition-colors"
-        >
-          <Star className="h-5 w-5" />
-          <span>My Favorites ({favorites.length})</span>
-        </Link>
       </div>
     </div>
   );
 };
-
-export default WineList;
