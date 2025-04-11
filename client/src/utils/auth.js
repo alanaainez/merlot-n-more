@@ -28,10 +28,14 @@ class AuthService {
 
   login(idToken) {
     localStorage.setItem('id_token', idToken);
+    // Dispatch a custom event to notify components about the auth change
+    window.dispatchEvent(new Event('auth-change'));
   }
 
   logout() {
     localStorage.removeItem('id_token');
+    // Dispatch a custom event to notify components about the auth change
+    window.dispatchEvent(new Event('auth-change'));
     window.location.assign('/');
   }
 }

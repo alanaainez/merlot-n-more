@@ -1,4 +1,4 @@
-import db from './connections.js';
+import db from './connection.js';
 import User from '../models/User.js';
 import bcryptjs from 'bcryptjs';
 

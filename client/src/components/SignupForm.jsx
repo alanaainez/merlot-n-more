@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 
-import { createUser } from '../utils/API';
-import Auth from '../utils/auth';
+import { createUser } from '../utils/api.js';
+import Auth from '../utils/auth.js';
 
 const SignupForm = ({ handleModalClose }) => {
   const [userFormData, setUserFormData] = useState({ username: '', email: '', password: '', savedWines: [] });

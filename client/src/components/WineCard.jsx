@@ -1,7 +1,7 @@
 import React from 'react';
 import { Star, Heart } from 'lucide-react';
-import { saveWine, removeWine } from '../utils/api';
-import Auth from '../utils/auth';
+import { saveWine, removeWine } from '../utils/api.js';
+import Auth from '../utils/auth.js';
 
 const WineCard = ({ wine, isFavorited, onFavoriteToggle }) => {
   const handleFavoriteClick = async () => {
