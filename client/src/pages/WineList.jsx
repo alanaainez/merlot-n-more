@@ -194,19 +194,6 @@ const WineList = () => {
     }
   }, [searchTerm]);
 
-  const isFavorite = (wineType) => favorites.includes(wineType);
-
-  const toggleFavorite = (wineType) => {
-    let updatedFavorites;
-    if (favorites.includes(wineType)) {
-      updatedFavorites = favorites.filter(fav => fav !== wineType);
-    } else {
-      updatedFavorites = [...favorites, wineType];
-    }
-    setFavorites(updatedFavorites);
-    localStorage.setItem(WINE_FAVORITES_KEY, JSON.stringify(updatedFavorites));
-  };
-
   return (
     <div className="max-w-7xl mx-auto px-4">
 
