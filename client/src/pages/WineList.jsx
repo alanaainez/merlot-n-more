@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Star, Loader } from 'lucide-react';
+import { Search, Filter, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { searchWines, fetchOpenFoodFactsWines } from '../lib/api.js';
 
@@ -36,56 +36,43 @@ const wineTypes = [
   }
 ];
 
-const commonWineTypes = [
-  "Cabernet Sauvignon", "Merlot", "Pinot Noir", "Chardonnay", "Sauvignon Blanc",
-  "Riesling", "Champagne", "Prosecco", "Rosé", "Syrah/Shiraz", "Malbec",
-  "Zinfandel", "Pinot Grigio", "Gewürztraminer", "Moscato"
-];
-
 const WineList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
+  const [favorites, setFavorites] = useState(() => {
+    const stored = localStorage.getItem(WINE_FAVORITES_KEY);
+    return stored ? JSON.parse(stored) : [];
+  });
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [wines, setWines] = useState([]);
+  const [error, setError] = useState('');
+  const searchRef = useRef(null);
+
   const [redWines, setRedWines] = useState([]);
   const [whiteWines, setWhiteWines] = useState([]);
   const [roseWines, setRoseWines] = useState([]);
   const [sparklingWines, setSparklingWines] = useState([]);
-  const [wines, setWines] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [favorites, setFavorites] = useState(() => {
-    const storedFavorites = localStorage.getItem(WINE_FAVORITES_KEY);
-    return storedFavorites ? JSON.parse(storedFavorites) : [];
-  });
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
-  const searchRef = useRef(null);
 
   useEffect(() => {
-    const loadWinesByType = async () => {
+    const loadWines = async () => {
       setLoading(true);
-      setError('');
       try {
-        const redData = await fetchOpenFoodFactsWines('red');
-        setRedWines(redData.filter(wine => wine.name)); // Only include wines with names
-
-        const whiteData = await fetchOpenFoodFactsWines('white');
-        setWhiteWines(whiteData.filter(wine => wine.name));
-
-        const roseData = await fetchOpenFoodFactsWines('rose');
-        setRoseWines(roseData.filter(wine => wine.name));
-
-        const sparklingData = await fetchOpenFoodFactsWines('sparkling');
-        setSparklingWines(sparklingData.filter(wine => wine.name));
-
-        setLoading(false);
+        const red = await fetchOpenFoodFactsWines('red');
+        const white = await fetchOpenFoodFactsWines('white');
+        const rose = await fetchOpenFoodFactsWines('rose');
+        const sparkling = await fetchOpenFoodFactsWines('sparkling');
+        setRedWines(red.filter(w => w.name));
+        setWhiteWines(white.filter(w => w.name));
+        setRoseWines(rose.filter(w => w.name));
+        setSparklingWines(sparkling.filter(w => w.name));
       } catch (err) {
-        setError('Failed to fetch initial wine data. Please try again.');
-        setLoading(false);
-        console.error('Error loading initial wine data:', err);
+        setError('Failed to load wines.');
       }
+      setLoading(false);
     };
-
-    loadWinesByType();
+    loadWines();
   }, []);
 
   // Add an effect to reload favorites whenever localStorage changes
@@ -102,15 +89,19 @@ const WineList = () => {
   }, []);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
         setShowSuggestions(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+
+  const handleSuggestionClick = (text) => {
+    setSearchTerm(text);
+    setShowSuggestions(false);
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -187,68 +178,61 @@ const WineList = () => {
     white: whiteWines,
     rose: roseWines,
     sparkling: sparklingWines,
+
   };
 
-  const filteredWinesByType = Object.entries(allWinesByType).reduce((acc, [type, wines]) => {
-    if (!selectedType || selectedType.toLowerCase() === type) {
-      acc[type] = wines;
-    } else {
-      acc[type] = [];
-    }
-    return acc;
-  }, {});
-
   useEffect(() => {
-    if (searchTerm.length > 0) {
-      const filtered = commonWineTypes.filter(type =>
-        type.toLowerCase().includes(searchTerm.toLowerCase())
+    if (searchTerm.length > 1) {
+      setSuggestions(
+        ["Merlot", "Pinot Noir", "Cabernet", "Rosé", "Chardonnay"].filter(s =>
+          s.toLowerCase().includes(searchTerm.toLowerCase())
+        )
       );
-      setSuggestions(filtered);
       setShowSuggestions(true);
     } else {
       setSuggestions([]);
-      setShowSuggestions(false);
     }
   }, [searchTerm]);
 
-  const handleSuggestionClick = (suggestion) => {
-    setSearchTerm(suggestion);
-    setShowSuggestions(false);
+  const isFavorite = (wineType) => favorites.includes(wineType);
+
+  const toggleFavorite = (wineType) => {
+    let updatedFavorites;
+    if (favorites.includes(wineType)) {
+      updatedFavorites = favorites.filter(fav => fav !== wineType);
+    } else {
+      updatedFavorites = [...favorites, wineType];
+    }
+    setFavorites(updatedFavorites);
+    localStorage.setItem(WINE_FAVORITES_KEY, JSON.stringify(updatedFavorites));
   };
-
-  const filteredSearchResults = wines.filter(wine => {
-    const matchesType = !selectedType || wine.title.toLowerCase().includes(selectedType.toLowerCase());
-    return matchesType;
-  });
-
-  const shouldDisplaySearchResults = searchTerm.length >= 2 && !loading && !error;
-  const shouldDisplayByType = searchTerm.length < 2;
 
   return (
     <div className="max-w-7xl mx-auto px-4">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4 md:mb-0">Wine Collection</h1>
+
+      <div className="flex flex-col md:flex-row justify-between items-center mt-8 mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Wine Collection</h1>
+
 
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative" ref={searchRef}>
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
-              type="text"
-              placeholder="Search wines..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => setShowSuggestions(true)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-[#8b0000] focus:border-[#8b0000] w-full"
+              placeholder="Search wines..."
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#8b0000] w-64"
             />
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-                {suggestions.map((suggestion, index) => (
+              <div className="absolute z-10 mt-1 bg-white border rounded-md shadow-md w-full">
+                {suggestions.map((sug, i) => (
                   <div
-                    key={index}
+                    key={i}
+                    onClick={() => handleSuggestionClick(sug)}
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleSuggestionClick(suggestion)}
                   >
-                    {suggestion}
+                    {sug}
                   </div>
                 ))}
               </div>
@@ -256,38 +240,58 @@ const WineList = () => {
           </div>
 
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-[#8b0000] focus:border-[#8b0000] w-full appearance-none"
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-[#8b0000] w-48"
             >
               <option value="">All Types</option>
-              <option value="red">Red Wine</option>
-              <option value="white">White Wine</option>
-              <option value="sparkling">Sparkling Wine</option>
+              <option value="red">Red</option>
+              <option value="white">White</option>
               <option value="rose">Rosé</option>
+              <option value="sparkling">Sparkling</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Wine Types Guide */}
-      <div className="mb-12 bg-[#fff8f8] rounded-xl p-8">
+      {/* Wine Types Section */}
+      <div className="mb-12 bg-[#fff8f8] p-6 rounded-xl animate-fadeIn">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Wine Types Guide</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {wineTypes.map((wine) => (
-            <Link
+            <div
               key={wine.type}
-              to={wine.path}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:scale-105 transition transform duration-300 relative"
             >
-              <div className="relative h-48">
-                <img
-                  src={wine.image}
-                  alt={wine.type}
-                  className="absolute inset-0 w-full h-full object-cover"
+              <button
+                onClick={() => toggleFavorite(wine.type)}
+                className="absolute top-2 right-2 z-10 p-1"
+                title="Toggle Favorite"
+              >
+                <Star
+                  className={`h-6 w-6 ${
+                    isFavorite(wine.type) ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                  }`}
                 />
+
+              </button>
+              <Link to={wine.path}>
+                <div className="relative h-48">
+                  <img
+                    src={wine.image}
+                    alt={wine.type}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <h3 className="absolute bottom-4 left-4 text-xl font-semibold text-white">
+                    {wine.type}
+                  </h3>
+                </div>
+                <div className="p-4">
+                  <p className="text-sm text-gray-700">{wine.description}</p>
+
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <h3 className="absolute bottom-4 left-4 text-xl font-semibold text-white">
                   {wine.type}
@@ -399,11 +403,14 @@ const WineList = () => {
                       </div>
                     </div>
                   ))}
+
                 </div>
-              </div>
-            )
+              </Link>
+            </div>
           ))}
         </div>
+
+
       )}
 
       {/* Link to favorites page */}
